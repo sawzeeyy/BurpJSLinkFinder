@@ -107,7 +107,7 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
         )
 
     def getTabCaption(self):
-        return "BurpJSLinkFinder"
+        return "LinkFinder"
 
     def getUiComponent(self):
         return self.tab
@@ -119,11 +119,14 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
         )
 
     def exportLog(self, event):
-        chooseFile = JFileChooser()
-        ret = chooseFile.showDialog(self.logPane, "Choose file")
-        filename = chooseFile.getSelectedFile().getCanonicalPath()
-        print("\n" + "Export to : " + filename)
-        open(filename, 'w', 0).write(self.outputTxtArea.text)
+        try:
+            chooseFile = JFileChooser()
+            ret = chooseFile.showDialog(self.logPane, "Choose file")
+            filename = chooseFile.getSelectedFile().getCanonicalPath()
+            print("\n" + "Export to : " + filename)
+            open(filename, 'w', 0).write(self.outputTxtArea.text)
+        except AttributeError:
+            print("No file selected")
 
     def doPassiveScan(self, ihrr):
         try:
