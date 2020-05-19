@@ -21,6 +21,7 @@ from java.lang import Runnable
 from thread import start_new_thread
 from javax.swing import JFileChooser
 
+
 # Using the Runnable class for thread-safety with Swing
 class Run(Runnable):
     def __init__(self, runner):
@@ -29,9 +30,10 @@ class Run(Runnable):
     def run(self):
         self.runner()
 
-# Needed params
 
-JSExclusionList = ['jquery', 'google-analytics','gpt.js']
+# Needed params
+JSExclusionList = ['jquery', 'google-analytics', 'gpt.js']
+
 
 class BurpExtender(IBurpExtender, IScannerCheck, ITab):
     def registerExtenderCallbacks(self, callbacks):
@@ -46,10 +48,13 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
         callbacks.registerScannerCheck(self)
         self.initUI()
         self.callbacks.addSuiteTab(self)
-        
-        print ("Burp JS LinkFinder loaded.")
-        print ("Copyright (c) 2019 Frans Hendrik Botes")
-        self.outputTxtArea.setText("Burp JS LinkFinder loaded." + "\n" + "Copyright (c) 2019 Frans Hendrik Botes" + "\n")
+
+        print("Burp JS LinkFinder loaded.")
+        print("Copyright (c) 2019 Frans Hendrik Botes")
+        self.outputTxtArea.setText(
+            "Burp JS LinkFinder loaded." + "\n" +
+            "Copyright (c) 2019 Frans Hendrik Botes" + "\n"
+        )
 
     def initUI(self):
         self.tab = swing.JPanel()
@@ -57,28 +62,30 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
         # UI for Output
         self.outputLabel = swing.JLabel("LinkFinder Log:")
         self.outputLabel.setFont(Font("Tahoma", Font.BOLD, 14))
-        self.outputLabel.setForeground(Color(255,102,52))
+        self.outputLabel.setForeground(Color(255, 102, 52))
         self.logPane = swing.JScrollPane()
         self.outputTxtArea = swing.JTextArea()
         self.outputTxtArea.setFont(Font("Consolas", Font.PLAIN, 12))
         self.outputTxtArea.setLineWrap(True)
         self.logPane.setViewportView(self.outputTxtArea)
-        self.clearBtn = swing.JButton("Clear Log", actionPerformed=self.clearLog)
-        self.exportBtn = swing.JButton("Export Log", actionPerformed=self.exportLog)
+        self.clearBtn = swing.JButton(
+            "Clear Log", actionPerformed=self.clearLog
+        )
+        self.exportBtn = swing.JButton(
+            "Export Log", actionPerformed=self.exportLog
+        )
         self.parentFrm = swing.JFileChooser()
-
-
 
         # Layout
         layout = swing.GroupLayout(self.tab)
         layout.setAutoCreateGaps(True)
         layout.setAutoCreateContainerGaps(True)
         self.tab.setLayout(layout)
-      
+
         layout.setHorizontalGroup(
-            layout.createParallelGroup()
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup()
+            layout.createParallelGroup().addGroup(
+                layout.createSequentialGroup().addGroup(
+                    layout.createParallelGroup()
                     .addComponent(self.outputLabel)
                     .addComponent(self.logPane)
                     .addComponent(self.clearBtn)
@@ -86,11 +93,11 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
                 )
             )
         )
-        
+
         layout.setVerticalGroup(
-            layout.createParallelGroup()
-            .addGroup(layout.createParallelGroup()
-                .addGroup(layout.createSequentialGroup()
+            layout.createParallelGroup().addGroup(
+                layout.createParallelGroup().addGroup(
+                    layout.createSequentialGroup()
                     .addComponent(self.outputLabel)
                     .addComponent(self.logPane)
                     .addComponent(self.clearBtn)
@@ -106,7 +113,10 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
         return self.tab
 
     def clearLog(self, event):
-          self.outputTxtArea.setText("Burp JS LinkFinder loaded." + "\n" + "Copyright (c) 2019 Frans Hendrik Botes" + "\n" )
+        self.outputTxtArea.setText(
+              "Burp JS LinkFinder loaded." + "\n" +
+              "Copyright (c) 2019 Frans Hendrik Botes" + "\n"
+        )
 
     def exportLog(self, event):
         chooseFile = JFileChooser()
@@ -115,32 +125,34 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
         print("\n" + "Export to : " + filename)
         open(filename, 'w', 0).write(self.outputTxtArea.text)
 
-    
     def doPassiveScan(self, ihrr):
-        
         try:
             urlReq = ihrr.getUrl()
             testString = str(urlReq)
-            linkA = linkAnalyse(ihrr,self.helpers)
+            linkA = linkAnalyse(ihrr, self.helpers)
             # check if JS file
             if ".js" in str(urlReq):
                 # Exclude casual JS files
                 if any(x in testString for x in JSExclusionList):
                     print("\n" + "[-] URL excluded " + str(urlReq))
                 else:
-                    self.outputTxtArea.append("\n" + "[+] Valid URL found: " + str(urlReq))
+                    self.outputTxtArea.append(
+                        "\n" + "[+] Valid URL found: " + str(urlReq)
+                    )
                     issueText = linkA.analyseURL()
                     for counter, issueText in enumerate(issueText):
-                            #print("TEST Value returned SUCCESS")
-                            self.outputTxtArea.append("\n" + "\t" + str(counter)+' - ' +issueText['link'])   
+                        # print("TEST Value returned SUCCESS")
+                        self.outputTxtArea.append(
+                            "\n" + "\t" + str(counter)+' - ' +
+                            issueText['link']
+                        )
 
                     issues = ArrayList()
                     issues.add(SRI(ihrr, self.helpers))
                     return issues
         except UnicodeEncodeError:
-            print ("Error in URL decode.")
+            print("Error in URL decode.")
         return None
-
 
     def consolidateDuplicateIssues(self, isb, isa):
         return -1
@@ -149,50 +161,50 @@ class BurpExtender(IBurpExtender, IScannerCheck, ITab):
         print "Burp JS LinkFinder unloaded"
         return
 
+
 class linkAnalyse():
-    
     def __init__(self, reqres, helpers):
         self.helpers = helpers
         self.reqres = reqres
-        
 
     regex_str = """
-    
-      (?:"|')                               # Start newline delimiter
-    
-      (
-        ((?:[a-zA-Z]{1,10}://|//)           # Match a scheme [a-Z]*1-10 or //
-        [^"'/]{1,}\.                        # Match a domainname (any character + dot)
-        [a-zA-Z]{2,}[^"']{0,})              # The domainextension and/or path
-    
-        |
-    
-        ((?:/|\.\./|\./)                    # Start with /,../,./
-        [^"'><,;| *()(%%$^/\\\[\]]          # Next character can't be...
-        [^"'><,;|()]{1,})                   # Rest of the characters can't be
-    
-        |
-    
-        ([a-zA-Z0-9_\-/]{1,}/               # Relative endpoint with /
-        [a-zA-Z0-9_\-/]{1,}                 # Resource name
-        \.(?:[a-zA-Z]{1,4}|action)          # Rest + extension (length 1-4 or action)
-        (?:[\?|/][^"|']{0,}|))              # ? mark with parameters
-    
-        |
-    
-        ([a-zA-Z0-9_\-]{1,}                 # filename
-        \.(?:php|asp|aspx|jsp|json|
-             action|html|js|txt|xml)             # . + extension
-        (?:\?[^"|']{0,}|))                  # ? mark with parameters
-    
-      )
-    
-      (?:"|')                               # End newline delimiter
-    
-    """     
 
-    def	parser_file(self, content, regex_str, mode=1, more_regex=None, no_dup=1):
-        #print ("TEST parselfile #2")
+      (?:"|')                       # Start newline delimiter
+
+      (
+        ((?:[a-zA-Z]{1,10}://|//)   # Match a scheme [a-Z]*1-10 or //
+        [^"'/]{1,}\.                # Match a domainname (any character + dot)
+        [a-zA-Z]{2,}[^"']{0,})      # The domainextension and/or path
+
+        |
+
+        ((?:/|\.\./|\./)            # Start with /,../,./
+        [^"'><,;| *()(%%$^/\\\[\]]  # Next character can't be...
+        [^"'><,;|()]{1,})           # Rest of the characters can't be
+
+        |
+
+        ([a-zA-Z0-9_\-/]{1,}/       # Relative endpoint with /
+        [a-zA-Z0-9_\-/]{1,}         # Resource name
+        \.(?:[a-zA-Z]{1,4}|action)  # Rest + extension (length 1-4 or action)
+        (?:[\?|/][^"|']{0,}|))      # ? mark with parameters
+
+        |
+
+        ([a-zA-Z0-9_\-]{1,}          # filename
+        \.(?:php|asp|aspx|jsp|json|
+             action|html|js|txt|xml) # . + extension
+        (?:\?[^"|']{0,}|))           # ? mark with parameters
+
+      )
+
+      (?:"|')                        # End newline delimiter
+
+    """
+
+    def parser_file(self, content, regex_str, mode=1, more_regex=None,
+                    no_dup=1):
+        # print("TEST parselfile #2")
         regex = re.compile(regex_str, re.VERBOSE)
         items = [{"link": m.group(1)} for m in re.finditer(regex, content)]
         if no_dup:
@@ -204,14 +216,14 @@ class linkAnalyse():
                     all_links.add(item["link"])
                     no_dup_items.append(item)
             items = no_dup_items
-    
+
         # Match Regex
         filtered_items = []
         for item in items:
             # Remove other capture groups from regex results
             if more_regex:
                 if re.search(more_regex, item["link"]):
-                    #print ("TEST parselfile #3")
+                    # print("TEST parselfile #3")
                     filtered_items.append(item)
             else:
                 filtered_items.append(item)
@@ -224,21 +236,23 @@ class linkAnalyse():
         thread.start()
 
     def analyseURL(self):
-        
+
         endpoints = ""
-        #print("TEST AnalyseURL #1")
-        mime_type=self.helpers.analyzeResponse(self.reqres.getResponse()).getStatedMimeType()
+        # print("TEST AnalyseURL #1")
+        mime_type = self.helpers.analyzeResponse(
+            self.reqres.getResponse()
+        ).getStatedMimeType()
         if mime_type.lower() == 'script':
-                url = self.reqres.getUrl()
-                encoded_resp=binascii.b2a_base64(self.reqres.getResponse())
-                decoded_resp=base64.b64decode(encoded_resp)
-                endpoints=self.parser_file(decoded_resp, self.regex_str)
-                #print("TEST AnalyseURL #2")
-                return endpoints
+            url = self.reqres.getUrl()
+            encoded_resp = binascii.b2a_base64(self.reqres.getResponse())
+            decoded_resp = base64.b64decode(encoded_resp)
+            endpoints = self.parser_file(decoded_resp, self.regex_str)
+            # print("TEST AnalyseURL #2")
+            return endpoints
         return endpoints
 
 
-class SRI(IScanIssue,ITab):
+class SRI(IScanIssue, ITab):
     def __init__(self, reqres, helpers):
         self.helpers = helpers
         self.reqres = reqres
@@ -259,35 +273,41 @@ class SRI(IScanIssue,ITab):
         return "Linkfinder Analysed JS files"
 
     def getIssueType(self):
-        return 0x08000000  # See http:#portswigger.net/burp/help/scanner_issuetypes.html
+        # See http:#portswigger.net/burp/help/scanner_issuetypes.html
+        return 0x08000000
 
     def getSeverity(self):
-        return "Information"  # "High", "Medium", "Low", "Information" or "False positive"
+        # "High", "Medium", "Low", "Information" or "False positive"
+        return "Information"
 
     def getConfidence(self):
-        return "Certain"  # "Certain", "Firm" or "Tentative"
+        # "Certain", "Firm" or "Tentative"
+        return "Certain"
 
     def getIssueBackground(self):
-        return str("JS files holds links to other parts of web applications. Refer to TAB for results.")
+        return str(
+            "JS files holds links to other parts of web applications."
+            "Refer to TAB for results."
+        )
 
     def getRemediationBackground(self):
         return "This is an <b>informational</b> finding only.<br>"
 
     def getIssueDetail(self):
-        return str("Burp Scanner has analysed the following JS file for links: <b>"
-                      "%s</b><br><br>" % (self.reqres.getUrl().toString()))
+        return str("Burp Scanner has analysed the following JS file for links:"
+                   "<b>%s</b><br><br>" % (self.reqres.getUrl().toString()))
 
     def getRemediationDetail(self):
         return None
 
     def getHttpMessages(self):
-        #print ("................raising issue................")
+        # print("................raising issue................")
         rra = [self.reqres]
         return rra
-        
+
     def getHttpService(self):
         return self.reqres.getHttpService()
-        
-        
+
+
 if __name__ in ('__main__', 'main'):
     EventQueue.invokeLater(Run(BurpExtender))
